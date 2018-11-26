@@ -119,7 +119,7 @@ pipeline_lgb = make_pipeline(pca, lgb)
 pipeline_blgb = make_pipeline(pca, blgb)
 
 lgb.fit(X_train, y_train)
-blgb.fit(X_train, y_train, sample_weight=[18.87 if y == 1 else 1 for y in y_train])
+blgb.fit(X_train, y_train, sample_weight=[18 if y == 1 else 1 for y in y_train])
 
 y_pred_lgb = lgb.predict(X_test)
 y_pred_blgb = blgb.predict(X_test)
@@ -151,7 +151,6 @@ weight_file = r'data\weight_file.csv'
 with open(weight_file, 'w') as f:
         f.write('%s,%s,%s,%s\n'%('weight','balanced_accuracy_score','geometric_mean_score','recall_score'))
         for i in range(1,31):
-                print(i)
                 sample_weight = [i if y == 1 else 1 for y in y_train]
                 blgb.fit(X_train, y_train, sample_weight=sample_weight)
                 y_pred_blgb = blgb.predict(X_test)
@@ -163,6 +162,6 @@ with open(weight_file, 'w') as f:
                 
                 f.write(f'{i}, {balanced_accuracy_score(y_test, y_pred_blgb)}, {geometric_mean_score(y_test, y_pred_blgb)},{recall_score(y_test, y_pred_blgb)}'+'\n')
 f.close
-
 plt.show()
+
 
