@@ -7,8 +7,8 @@ This examples shows the use of forests of trees to evaluate the importance of
 features on an artificial classification task. The red bars are the feature
 importances of the forest, along with their inter-trees variability.
 
-As expected, the plot suggests that 3 features are informative, while the
-remaining are not.
+modified by yxsong: yxsong@cug.edu.cn
+
 """
 print(__doc__)
 
@@ -18,10 +18,6 @@ import matplotlib.pyplot as plt
 
 from sklearn.datasets import make_classification
 from sklearn.ensemble import ExtraTreesClassifier, GradientBoostingClassifier
-
-# Build a classification task using 3 informative features
-data = pd.read_csv('./data/wanzhou_island.csv')
-X, y, GeoID = data_raw(data)
 
 # Data prepare
 def data_raw(data):
@@ -33,6 +29,10 @@ def data_raw(data):
     X = data[x_columns]
     y = data[target]
     return X, y, GeoID
+
+# Build a classification task using 3 informative features
+data = pd.read_csv('./data/wanzhou_island.csv')
+X, y, GeoID = data_raw(data)
 
 # Build a forest and compute the feature importances
 forest = ExtraTreesClassifier(n_estimators=250,
