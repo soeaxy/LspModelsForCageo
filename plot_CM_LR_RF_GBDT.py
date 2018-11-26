@@ -10,6 +10,7 @@ from lightgbm import LGBMClassifier
 from sklearn import datasets, preprocessing
 from sklearn.decomposition import PCA
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.linear_model import LogisticRegressionCV
 from sklearn.metrics import (balanced_accuracy_score, classification_report,
                              confusion_matrix, recall_score, roc_auc_score)
 from sklearn.model_selection import train_test_split
@@ -68,6 +69,40 @@ X_test = preprocessing.scale(X_test)
 pca = PCA(n_components='mle')
 
 ###############################################################################
+# Classification using LogisticRegressionCV classifier with and without sampling
+###############################################################################
+
+lr = LogisticRegressionCV(cv=5, random_state=0)
+blr = LogisticRegressionCV(cv=5, random_state=0, class_weight='balanced')
+
+# Add one transformers and a sampler in the pipeline object
+pipeline_lr = make_pipeline(pca, lr)
+pipeline_blr = make_pipeline(pca, blr)
+
+pipeline_lr.fit(X_train, y_train)
+pipeline_blr.fit(X_train, y_train)
+
+y_pred_lr = pipeline_lr.predict(X_test)
+y_pred_blr = pipeline_blr.predict(X_test)
+
+print('Logistic Regression classifier performance:')
+print('Balanced accuracy: {:.2f} - Geometric mean {:.2f}'
+      .format(balanced_accuracy_score(y_test, y_pred_lr),
+              geometric_mean_score(y_test, y_pred_lr)))
+cm_rf = confusion_matrix(y_test, y_pred_lr)
+fig, ax = plt.subplots(ncols=2)
+plot_confusion_matrix(cm_rf, classes=[0,1], ax=ax[0],
+                      title='Logistic Regression')
+
+print('Balanced Logistic Regression classifier performance:')
+print('Balanced accuracy: {:.2f} - Geometric mean {:.2f}'
+      .format(balanced_accuracy_score(y_test, y_pred_blr),
+              geometric_mean_score(y_test, y_pred_blr)))
+cm_brf = confusion_matrix(y_test, y_pred_blr)
+plot_confusion_matrix(cm_brf, classes=[0,1], ax=ax[1],
+                      title='Balanced Logistic Regression')
+
+###############################################################################
 # Classification using random forest classifier with and without sampling
 ###############################################################################
 # Random forest is another popular ensemble method and it is usually
@@ -76,6 +111,7 @@ pca = PCA(n_components='mle')
 
 rf = RandomForestClassifier(random_state=0, n_jobs=-1)
 brf = BalancedRandomForestClassifier(random_state=0, n_jobs=-1)
+
 # Add one transformers and a sampler in the pipeline object
 pipeline_rf = make_pipeline(pca, rf)
 pipeline_brf = make_pipeline(pca, brf)
@@ -145,23 +181,4 @@ cm_blgb = confusion_matrix(y_test, y_pred_blgb)
 plot_confusion_matrix(cm_blgb, classes=[0,1], ax=ax[1],
                       title='Weighted GBDT')
 
-# Change weight for the sample and save the weight
-weight_file = r'data\weight_file.csv'
-
-with open(weight_file, 'w') as f:
-        f.write('%s,%s,%s,%s\n'%('weight','balanced_accuracy_score','geometric_mean_score','recall_score'))
-        for i in range(1,31):
-                sample_weight = [i if y == 1 else 1 for y in y_train]
-                blgb.fit(X_train, y_train, sample_weight=sample_weight)
-                y_pred_blgb = blgb.predict(X_test)
-
-                print(f'Weight is {i}: '+'Weighted GBDT classifier performance:')
-                print('Balanced accuracy: {:.3f} - Geometric mean {:.3f} - Recall {:.3f} - AUC {:.3f}'
-                .format(balanced_accuracy_score(y_test, y_pred_blgb),
-                        geometric_mean_score(y_test, y_pred_blgb), recall_score(y_test, y_pred_blgb), roc_auc_score(y_test,y_pred_blgb)))
-                
-                f.write(f'{i}, {balanced_accuracy_score(y_test, y_pred_blgb)}, {geometric_mean_score(y_test, y_pred_blgb)},{recall_score(y_test, y_pred_blgb)}'+'\n')
-f.close
 plt.show()
-
-

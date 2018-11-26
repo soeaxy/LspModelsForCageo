@@ -18,11 +18,21 @@ import matplotlib.pyplot as plt
 
 from sklearn.datasets import make_classification
 from sklearn.ensemble import ExtraTreesClassifier, GradientBoostingClassifier
-from prepare_data import data_raw
 
 # Build a classification task using 3 informative features
 data = pd.read_csv('./data/wanzhou_island.csv')
 X, y, GeoID = data_raw(data)
+
+# Data prepare
+def data_raw(data):
+    target = 'value'
+    IDCol = 'ID'
+    GeoID = data[IDCol]
+    print(data[target].value_counts())
+    x_columns = [x for x in data.columns if x not in [target,IDCol,'GRID_CODE']]
+    X = data[x_columns]
+    y = data[target]
+    return X, y, GeoID
 
 # Build a forest and compute the feature importances
 forest = ExtraTreesClassifier(n_estimators=250,

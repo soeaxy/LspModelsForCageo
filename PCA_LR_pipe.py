@@ -31,7 +31,16 @@ from sklearn.model_selection import (GridSearchCV, cross_val_score,
                                      train_test_split)
 from sklearn.pipeline import Pipeline
 
-from prepare_data import data_raw
+# Data prepare
+def data_raw(data):
+    target = 'value'
+    IDCol = 'ID'
+    GeoID = data[IDCol]
+    print(data[target].value_counts())
+    x_columns = [x for x in data.columns if x not in [target,IDCol,'GRID_CODE']]
+    X = data[x_columns]
+    y = data[target]
+    return X, y, GeoID
 
 # Define a pipeline to search for the best combination of PCA truncation
 # and classifier regularization.

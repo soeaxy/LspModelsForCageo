@@ -33,9 +33,8 @@ plt.annotate(
         bbox = dict(boxstyle = 'round,pad=0.5', fc = 'yellow', alpha = 0.5),
         arrowprops = dict(arrowstyle = '->', connectionstyle = 'arc3,rad=0'))
 
-# plt.text(20, 0.7, show_max, fontsize=12)
-plt.legend()
-plt.axvline(x=max_AUC+1, color='b', linestyle=':', linewidth=1)
+plt.axvline(x=max_AUC+1, color='b', linestyle=':', linewidth=1, label='Best weight chosen')
 plt.xlabel('Weight of the landslide samples data')
 plt.ylabel('Score of AUC and Mean_Recall')
+plt.legend()
 plt.show()
