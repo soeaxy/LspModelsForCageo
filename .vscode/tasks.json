@@ -1,0 +1,11 @@
+{
+    "version": "2.0.0",
+    "command": "python",
+    "args": ["${file}"],
+    "options": {
+        "env":{
+            "PYTHONIOENCODING": "UTF-8"
+          }
+    },
+    "problemMatchers": []
+}
