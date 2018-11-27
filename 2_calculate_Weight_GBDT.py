@@ -1,3 +1,6 @@
+'''
+ref: http://www.itkeyword.com/doc/7731032350828881x509/sklearn-pipeline-applying-sample-weights-after-applying-a-polynomial-feature-t
+'''
 import itertools
 
 import matplotlib.pyplot as plt
@@ -14,6 +17,11 @@ from sklearn.linear_model import LogisticRegressionCV
 from sklearn.metrics import (balanced_accuracy_score, classification_report,
                              confusion_matrix, recall_score, roc_auc_score)
 from sklearn.model_selection import train_test_split
+from sklearn.pipeline import Pipeline
+
+###############################################################################
+# Load an imbalanced dataset
+###############################################################################
 
 # Data prepare
 def data_raw(data):
@@ -25,9 +33,6 @@ def data_raw(data):
     X = data[x_columns]
     y = data[target]
     return X, y, GeoID
-###############################################################################
-# Load an imbalanced dataset
-###############################################################################
 
 data = pd.read_csv('./data/wanzhou_island.csv')
 X, y, GeoID = data_raw(data)
@@ -35,7 +40,10 @@ X = preprocessing.scale(X)
 X_train, X_test, y_train, y_test = train_test_split(X, y, stratify=y, random_state=0)
 
 # Instanciate a PCA object
-pca = PCA(n_components='mle')
+pca = PCA(n_components=10)
+
+# Instanciate a StandardScaler object
+stdscaler = preprocessing.StandardScaler()
 
 ###############################################################################
 # Classification using lightGBM classifier with different sample weight
@@ -44,8 +52,7 @@ pca = PCA(n_components='mle')
 blgb = LGBMClassifier(random_state=0, n_jobs=-1)
 
 # Add one transformers and a sampler in the pipeline object
-pipeline_blgb = make_pipeline(pca, blgb)
-y_pred_blgb = pipeline_blgb.predict(X_test)
+pipeline_blgb = Pipeline([('STDSCALE', stdscaler), ('PCA', pca), ('BLGB', blgb)])
 
 # Change weight for the sample and save the weight
 weight_file = r'data\weight_file.csv'
@@ -53,7 +60,7 @@ with open(weight_file, 'w') as f:
         f.write('%s,%s,%s,%s\n'%('weight','balanced_accuracy_score','geometric_mean_score','recall_score'))
         for i in range(1,31):
                 sample_weight = [i if y == 1 else 1 for y in y_train]
-                pipeline_blgb.fit(X_train, y_train, sample_weight=sample_weight)
+                pipeline_blgb.fit(X_train, y_train, **{'BLGB__sample_weight': sample_weight})
                 y_pred_blgb = pipeline_blgb.predict(X_test)
 
                 print(f'Weight is {i}: '+'Weighted GBDT classifier performance:')

@@ -60,12 +60,13 @@ def data_raw(data):
 
 data = pd.read_csv('./data/wanzhou_island.csv')
 X, y, GeoID = data_raw(data)
-X = preprocessing.scale(X)
+X_train, X_test, y_train, y_test = train_test_split(X, y, stratify=y, random_state=0)
 
 # Instanciate a PCA object
 pca = PCA(n_components='mle')
 
-X_train, X_test, y_train, y_test = train_test_split(X, y, stratify=y, random_state=0)
+# Instanciate a StandardScaler object
+stdscaler = preprocessing.StandardScaler()
 
 ###############################################################################
 # Classification using LogisticRegressionCV classifier with and without sampling
@@ -75,8 +76,8 @@ lr = LogisticRegressionCV(cv=5, random_state=0)
 blr = LogisticRegressionCV(cv=5, random_state=0, class_weight='balanced')
 
 # Add one transformers and a sampler in the pipeline object
-pipeline_lr = make_pipeline(pca, lr)
-pipeline_blr = make_pipeline(pca, blr)
+pipeline_lr = make_pipeline(stdscaler, pca, lr)
+pipeline_blr = make_pipeline(stdscaler, pca, blr)
 
 pipeline_lr.fit(X_train, y_train)
 pipeline_blr.fit(X_train, y_train)
@@ -112,8 +113,8 @@ rf = RandomForestClassifier(random_state=0, n_jobs=-1)
 brf = BalancedRandomForestClassifier(random_state=0, n_jobs=-1)
 
 # Add one transformers and a sampler in the pipeline object
-pipeline_rf = make_pipeline(pca, rf)
-pipeline_brf = make_pipeline(pca, brf)
+pipeline_rf = make_pipeline(stdscaler, pca, rf)
+pipeline_brf = make_pipeline(stdscaler, pca, brf)
 
 pipeline_rf.fit(X_train, y_train)
 pipeline_brf.fit(X_train, y_train)
@@ -150,8 +151,8 @@ lgb = LGBMClassifier(random_state=0, n_jobs=-1)
 blgb = LGBMClassifier(random_state=0, n_jobs=-1, class_weight='balanced')
 
 # Add one transformers and a sampler in the pipeline object
-pipeline_lgb = make_pipeline(pca, lgb)
-pipeline_blgb = make_pipeline(pca, blgb)
+pipeline_lgb = make_pipeline(stdscaler, pca, lgb)
+pipeline_blgb = make_pipeline(stdscaler, pca, blgb)
 
 pipeline_lgb.fit(X_train, y_train)
 pipeline_blgb.fit(X_train, y_train)
@@ -220,3 +221,5 @@ y_pred_lr = pipeline_lr.predict(X)
 y_pred_proba_lr = pipeline_lr.predict_proba(X)[:,1]
 result_file_lr = './data/lr.txt'
 save_results(GeoID, y_pred_lr, y_pred_proba_lr, result_file_lr)
+
+print('Done')

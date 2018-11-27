@@ -18,11 +18,11 @@ max_AUC=np.argmax(AUC)
 max_Recall=np.argmax(Recall)
 
 plt.plot(weight,AUC,'r-*',label=name_list[0])
-plt.plot(max_AUC+1,AUC[max_AUC])
+plt.plot(max_AUC+1,AUC[max_AUC],'gs')
 
 plt.plot(weight,Recall,'g-o',label=name_list[1])
-plt.plot(max_Recall+1,Recall[max_Recall])
-show_max='Best Weight: '+str(max_Recall+1) + '\n'+'AUC: 0.921' + '\n' + 'Recall: 0.921 '
+plt.plot(max_Recall+1,Recall[max_Recall],'bs')
+show_max='Best Weight: '+str(max_Recall+1) + '\n'+f'AUC: {AUC[max_AUC]}' + '\n' + f'Recall: {Recall[max_Recall]} '
 
 plt.annotate(
         show_max, 
