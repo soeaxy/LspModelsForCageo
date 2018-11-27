@@ -40,7 +40,7 @@ X = preprocessing.scale(X)
 X_train, X_test, y_train, y_test = train_test_split(X, y, stratify=y, random_state=0)
 
 # Instanciate a PCA object
-pca = PCA(n_components=10)
+pca = PCA(n_components='mle')
 
 # Instanciate a StandardScaler object
 stdscaler = preprocessing.StandardScaler()
