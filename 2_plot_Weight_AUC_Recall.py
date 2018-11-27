@@ -8,33 +8,37 @@ from matplotlib.ticker import MultipleLocator, FormatStrFormatter
 # Load a dataset
 ###############################################################################
 data = pd.read_csv('data\weight_file.csv')
-name_list = ['AUC','Mean_Recall']
+name_list = ['Balanced accuracy','geometric_mean_score','Recall','AUC']
 weight = data['weight']
-AUC = data['balanced_accuracy_score']
-Recall = data['geometric_mean_score']
+Balanced_acc_score = data['balanced_accuracy_score']
+Geo_score = data['geometric_mean_score']
+Recall = data['recall_score']
+AUC = data['AUC']
 
 # Find max value
-max_AUC=np.argmax(AUC)
+max_Geo=np.argmax(Geo_score)
 max_Recall=np.argmax(Recall)
 
-plt.plot(weight,AUC,'r-*',label=name_list[0])
-plt.plot(max_AUC+1,AUC[max_AUC],'gs')
+plt.plot(weight,Balanced_acc_score,'r-*',label=name_list[0])
+plt.plot(weight,Recall,'g-o',label=name_list[2])
+plt.plot(weight,AUC,'b-*',label=name_list[3])
 
-plt.plot(weight,Recall,'g-o',label=name_list[1])
-plt.plot(max_Recall+1,Recall[max_Recall],'bs')
-show_max='Best Weight: '+str(max_Recall+1) + '\n'+f'AUC: {round(AUC[max_AUC],3)}' + '\n' + f'Recall: {round(Recall[max_Recall],3)} '
+plt.plot(max_Geo+1,Geo_score[max_Geo],'gs')
+
+# plt.plot(max_Recall+1,Recall[max_Recall],'bs')
+show_max='Best Weight: '+str(max_Geo+1) + '\n'+f'Balanced_Accuracy: {round(Balanced_acc_score[max_Geo],3)}'
 
 plt.annotate(
         show_max, 
-        xy = (max_Recall+1,Recall[max_Recall]), 
+        xy = (max_Geo+1,Geo_score[max_Geo]), 
         xycoords='data',
-        xytext = (25,0.75),
+        xytext = (24,0.65),
         textcoords = 'data', ha = 'center', va = 'center',
         bbox = dict(boxstyle = 'round,pad=0.5', fc = 'yellow', alpha = 0.5),
         arrowprops = dict(arrowstyle = '->', connectionstyle = 'arc3,rad=0'))
 
-plt.axvline(x=max_AUC+1, color='b', linestyle=':', linewidth=1, label='Best weight chosen')
+plt.axvline(x=max_Geo+1, color='b', linestyle=':', linewidth=1, label='Best weight chosen')
 plt.xlabel('Weight of the landslide samples data')
-plt.ylabel('Score of AUC and Mean_Recall')
+plt.ylabel('Score')
 plt.legend()
 plt.show()

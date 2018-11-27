@@ -57,17 +57,17 @@ pipeline_blgb = Pipeline([('STDSCALE', stdscaler), ('PCA', pca), ('BLGB', blgb)]
 # Change weight for the sample and save the weight
 weight_file = r'data\weight_file.csv'
 with open(weight_file, 'w') as f:
-        f.write('%s,%s,%s,%s\n'%('weight','balanced_accuracy_score','geometric_mean_score','recall_score'))
+        f.write('%s,%s,%s,%s,%s\n'%('weight','balanced_accuracy_score','geometric_mean_score','recall_score','AUC'))
         for i in range(1,31):
                 sample_weight = [i if y == 1 else 1 for y in y_train]
                 pipeline_blgb.fit(X_train, y_train, **{'BLGB__sample_weight': sample_weight})
                 y_pred_blgb = pipeline_blgb.predict(X_test)
-
+                y_pred_blgb_p = pipeline_blgb.predict_proba(X_test)[:, 1]
                 print(f'Weight is {i}: '+'Weighted GBDT classifier performance:')
                 print('Balanced accuracy: {:.3f} - Geometric mean {:.3f} - Recall {:.3f} - AUC {:.3f}'
                 .format(balanced_accuracy_score(y_test, y_pred_blgb),
-                        geometric_mean_score(y_test, y_pred_blgb), recall_score(y_test, y_pred_blgb), roc_auc_score(y_test,y_pred_blgb)))
+                        geometric_mean_score(y_test, y_pred_blgb), recall_score(y_test, y_pred_blgb), roc_auc_score(y_test,y_pred_blgb_p)))
                 
-                f.write(f'{i}, {balanced_accuracy_score(y_test, y_pred_blgb)}, {geometric_mean_score(y_test, y_pred_blgb)},{recall_score(y_test, y_pred_blgb)}'+'\n')
+                f.write(f'{i}, {balanced_accuracy_score(y_test, y_pred_blgb)}, {geometric_mean_score(y_test, y_pred_blgb)}, {recall_score(y_test, y_pred_blgb)}, {roc_auc_score(y_test,y_pred_blgb_p)}'+'\n')
 print('Done')
 f.close

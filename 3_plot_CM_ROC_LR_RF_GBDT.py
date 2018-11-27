@@ -12,8 +12,10 @@ from sklearn import datasets, preprocessing
 from sklearn.decomposition import PCA
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LogisticRegressionCV
+
 from sklearn.metrics import (balanced_accuracy_score, classification_report,
-                             confusion_matrix, recall_score, roc_auc_score)
+                             confusion_matrix, recall_score, roc_auc_score,
+                             roc_curve, auc)
 from sklearn.model_selection import train_test_split
 
 
@@ -101,6 +103,7 @@ print('Balanced accuracy: {:.3f} - Geometric mean {:.3f}'
 cm_brf = confusion_matrix(y_test, y_pred_blr)
 plot_confusion_matrix(cm_brf, classes=[0,1], ax=ax[1],
                       title='Balanced Logistic Regression')
+plt.show()
 
 ###############################################################################
 # Classification using random forest classifier with and without sampling
@@ -143,6 +146,7 @@ cm_brf = confusion_matrix(y_test, y_pred_brf)
 plot_confusion_matrix(cm_brf, classes=[0,1], ax=ax[1],
                       title='Balanced random forest')
 
+plt.show()
 ###############################################################################
 # Classification using lightGBM classifier with and without sampling
 ###############################################################################
@@ -165,7 +169,6 @@ print('Balanced accuracy: {:.3f} - Geometric mean {:.3f} - Recall {:.3f} - AUC {
       .format(balanced_accuracy_score(y_test, y_pred_lgb),
               geometric_mean_score(y_test, y_pred_lgb), recall_score(y_test, y_pred_lgb), roc_auc_score(y_test,y_pred_lgb)))
 
-# print('GBDT\n',classification_report(y_test, y_pred_lgb, target_names=['No_Landslide','Landslide']))
 cm_lgb = confusion_matrix(y_test, y_pred_lgb)
 fig, ax = plt.subplots(ncols=2)
 plot_confusion_matrix(cm_lgb, classes=[0,1], ax=ax[0],
@@ -175,11 +178,44 @@ print('Weighted GBDT classifier performance:')
 print('Balanced accuracy: {:.3f} - Geometric mean {:.3f} - Recall {:.3f} - AUC {:.3f}'
       .format(balanced_accuracy_score(y_test, y_pred_blgb),
               geometric_mean_score(y_test, y_pred_blgb), recall_score(y_test, y_pred_blgb), roc_auc_score(y_test,y_pred_blgb)))
-# print('weighted GBDT\n',classification_report(y_test, y_pred_blgb, target_names=['No_Landslide','Landslide']))
 
 cm_blgb = confusion_matrix(y_test, y_pred_blgb)
 plot_confusion_matrix(cm_blgb, classes=[0,1], ax=ax[1],
                       title='Weighted GBDT')
+plt.show()
+###############################################################################
+# Plot ROC
+###############################################################################
+
+# The lr model by itself
+y_pred_lr_p = pipeline_lr.predict_proba(X_test)[:, 1]
+fpr_lr, tpr_lr, _ = roc_curve(y_test, y_pred_lr_p)
+# auc_lr = auc(fpr_lr, tpr_lr)
+auc_lr = roc_auc_score(y_test,y_pred_lr_p)
+
+
+# The gbdt model by itself
+y_pred_lgb_p = pipeline_lgb.predict_proba(X_test)[:, 1]
+fpr_lgb, tpr_lgb, _ = roc_curve(y_test, y_pred_lgb_p)
+# auc_lgb = auc(fpr_lgb, tpr_lgb)
+auc_lgb = roc_auc_score(y_test,y_pred_lgb_p)
+
+
+# The weighted gbdt model by itself
+y_pred_blgb_p = pipeline_blgb.predict_proba(X_test)[:, 1]
+fpr_blgb, tpr_blgb, _ = roc_curve(y_test, y_pred_blgb_p)
+# auc_blgb = auc(fpr_blgb, tpr_blgb)
+auc_blgb = roc_auc_score(y_test,y_pred_blgb_p)
+
+plt.figure(1)
+plt.plot([0, 1], [0, 1], 'k--')
+plt.plot(fpr_lr, tpr_lr, label='LR (AUC=%0.3f)' % (auc_lr), lw=2)
+plt.plot(fpr_lgb, tpr_lgb, label='GBDT (AUC=%0.3f)' % (auc_lgb), lw=2)
+plt.plot(fpr_blgb, tpr_blgb, label='Weighted GBDT(AUC=%0.3f)' % (auc_blgb), lw=2)
+plt.xlabel('False positive rate')
+plt.ylabel('True positive rate')
+plt.title('ROC curve')
+plt.legend(loc='best')
 
 plt.show()
 
