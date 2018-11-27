@@ -22,13 +22,13 @@ plt.plot(max_AUC+1,AUC[max_AUC],'gs')
 
 plt.plot(weight,Recall,'g-o',label=name_list[1])
 plt.plot(max_Recall+1,Recall[max_Recall],'bs')
-show_max='Best Weight: '+str(max_Recall+1) + '\n'+f'AUC: {AUC[max_AUC]}' + '\n' + f'Recall: {Recall[max_Recall]} '
+show_max='Best Weight: '+str(max_Recall+1) + '\n'+f'AUC: {round(AUC[max_AUC],3)}' + '\n' + f'Recall: {round(Recall[max_Recall],3)} '
 
 plt.annotate(
         show_max, 
         xy = (max_Recall+1,Recall[max_Recall]), 
         xycoords='data',
-        xytext = (25,0.8),
+        xytext = (25,0.75),
         textcoords = 'data', ha = 'center', va = 'center',
         bbox = dict(boxstyle = 'round,pad=0.5', fc = 'yellow', alpha = 0.5),
         arrowprops = dict(arrowstyle = '->', connectionstyle = 'arc3,rad=0'))
