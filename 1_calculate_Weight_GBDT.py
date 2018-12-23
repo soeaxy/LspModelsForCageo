@@ -36,7 +36,6 @@ def data_raw(data):
 
 data = pd.read_csv('./data/wanzhou_island.csv')
 X, y, GeoID = data_raw(data)
-X = preprocessing.scale(X)
 X_train, X_test, y_train, y_test = train_test_split(X, y, stratify=y, random_state=0)
 
 # Instanciate a PCA object

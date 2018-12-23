@@ -12,6 +12,7 @@ modified by yxsong: yxsong@cug.edu.cn
 """
 print(__doc__)
 
+from sklearn import preprocessing
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -25,14 +26,15 @@ def data_raw(data):
     IDCol = 'ID'
     GeoID = data[IDCol]
     print(data[target].value_counts())
-    x_columns = [x for x in data.columns if x not in [target,IDCol,'GRID_CODE']]
+    x_columns = [x for x in data.columns if x not in [target, IDCol, 'GRID_CODE']]
     X = data[x_columns]
     y = data[target]
     return X, y, GeoID
 
 # Build a classification task using 3 informative features
 data = pd.read_csv('./data/wanzhou_island.csv')
-X, y, GeoID = data_raw(data)
+X, y, _ = data_raw(data)
+X = preprocessing.scale(X)
 
 # Build a forest and compute the feature importances
 forest = ExtraTreesClassifier(n_estimators=250,
@@ -58,3 +60,6 @@ plt.bar(range(X.shape[1]), importances[indices],
 plt.xticks(range(X.shape[1]), indices)
 plt.xlim([-1, X.shape[1]])
 plt.show()
+
+
+
