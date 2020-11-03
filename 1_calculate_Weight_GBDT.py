@@ -29,8 +29,10 @@ def data_raw(data):
     IDCol = 'ID'
     GeoID = data[IDCol]
     print(data[target].value_counts())
-    x_columns = [x for x in data.columns if x not in [target,IDCol,'GRID_CODE']]
-    X = data[x_columns]
+#     x_columns = [x for x in data.columns if x not in [target,IDCol,'GRID_CODE']]
+#     X = data[x_columns]
+    colName = ['Elevation', 'Slope', 'Aspect', 'TRI', 'Curvature', 'Lithology', 'River', 'NDVI', 'NDWI', 'Rainfall', 'Earthquake', 'Land_use']
+    X = data[colName]
     y = data[target]
     return X, y, GeoID
 

@@ -19,14 +19,14 @@ AUC = data['AUC']
 max_Geo=np.argmax(Geo_score)
 max_Recall=np.argmax(Recall)
 
-plt.plot(weight,Balanced_acc_score,'r-*',label=name_list[0])
+plt.plot(weight,Geo_score,'r-*',label='Geometric Mean Score')
 plt.plot(weight,Recall,'g-o',label=name_list[2])
 plt.plot(weight,AUC,'b-*',label=name_list[3])
 
 plt.plot(max_Geo+1,Geo_score[max_Geo],'gs')
 
 # plt.plot(max_Recall+1,Recall[max_Recall],'bs')
-show_max='Best Weight: '+str(max_Geo+1) + '\n'+f'Balanced_Accuracy: {round(Balanced_acc_score[max_Geo],3)}'
+show_max='Best Weight: '+str(max_Geo+1) + '\n'+f'Geometric Mean Score: {round(Geo_score[max_Geo],3)}'
 
 plt.annotate(
         show_max, 

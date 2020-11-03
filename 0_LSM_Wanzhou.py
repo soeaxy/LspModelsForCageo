@@ -305,13 +305,14 @@ def data_raw():
     IDCol = 'ID'
     GeoID = train[IDCol]
     print(train[target].value_counts())
-    x_columns = [x for x in train.columns if x not in [target,IDCol,'GRID_CODE']]
+    # x_columns = [x for x in train.columns if x not in [target,IDCol,'GRID_CODE']]
+    x_columns = ['Elevation', 'Slope', 'Aspect', 'TRI', 'Curvature', 'Lithology', 'River', 'NDVI', 'NDWI', 'Rainfall', 'Earthquake', 'Land_use']
     X = train[x_columns]
     y = train[target]
     return X, y, GeoID
 
 def data_prepare(method = 'no_resample'):
-    X, y ,GeoID = data_raw()
+    X, y, GeoID = data_raw()
 
     X = preprocessing.scale(X)
 
