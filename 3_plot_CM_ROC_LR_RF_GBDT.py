@@ -64,7 +64,7 @@ def data_raw(data):
 
 data = pd.read_csv('./data/wanzhou_island.csv')
 X, y, GeoID = data_raw(data)
-X_train, X_test, y_train, y_test = train_test_split(X, y, stratify=y, random_state=0)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3,stratify=y, random_state=0)
 
 # Instanciate a PCA object
 pca = PCA(n_components='mle')
@@ -186,34 +186,50 @@ plot_confusion_matrix(cm_blgb, classes=[0,1], ax=ax[1],
                       title='Weighted GBDT')
 plt.show()
 ###############################################################################
-# Plot ROC
+# Plot ROC Curve
 ###############################################################################
 
 # The lr model by itself
 y_pred_lr_p = pipeline_lr.predict_proba(X_test)[:, 1]
 fpr_lr, tpr_lr, _ = roc_curve(y_test, y_pred_lr_p)
-# auc_lr = auc(fpr_lr, tpr_lr)
 auc_lr = roc_auc_score(y_test,y_pred_lr_p)
 
+# The weighted lr model by itself
+y_pred_blr_p = pipeline_blr.predict_proba(X_test)[:, 1]
+fpr_blr, tpr_blr, _ = roc_curve(y_test, y_pred_blr_p)
+auc_blr = roc_auc_score(y_test,y_pred_blr_p)
 
 # The gbdt model by itself
 y_pred_lgb_p = pipeline_lgb.predict_proba(X_test)[:, 1]
 fpr_lgb, tpr_lgb, _ = roc_curve(y_test, y_pred_lgb_p)
-# auc_lgb = auc(fpr_lgb, tpr_lgb)
 auc_lgb = roc_auc_score(y_test,y_pred_lgb_p)
-
 
 # The weighted gbdt model by itself
 y_pred_blgb_p = pipeline_blgb.predict_proba(X_test)[:, 1]
 fpr_blgb, tpr_blgb, _ = roc_curve(y_test, y_pred_blgb_p)
-# auc_blgb = auc(fpr_blgb, tpr_blgb)
 auc_blgb = roc_auc_score(y_test,y_pred_blgb_p)
+
+# The rf model by itself
+y_pred_rf_p = pipeline_rf.predict_proba(X_test)[:, 1]
+fpr_rf, tpr_rf, _ = roc_curve(y_test, y_pred_rf_p)
+auc_rf = roc_auc_score(y_test,y_pred_rf_p)
+
+# The weighted rf model by itself
+y_pred_brf_p = pipeline_brf.predict_proba(X_test)[:, 1]
+fpr_brf, tpr_brf, _ = roc_curve(y_test, y_pred_brf_p)
+auc_brf = roc_auc_score(y_test,y_pred_brf_p)
 
 plt.figure(1)
 plt.plot([0, 1], [0, 1], 'k--')
 plt.plot(fpr_lr, tpr_lr, label='LR (AUC=%0.3f)' % (auc_lr), lw=2)
+plt.plot(fpr_blr, tpr_blr, label='Weighted LR (AUC=%0.3f)' % (auc_blr), lw=2)
+
 plt.plot(fpr_lgb, tpr_lgb, label='GBDT (AUC=%0.3f)' % (auc_lgb), lw=2)
 plt.plot(fpr_blgb, tpr_blgb, label='Weighted GBDT(AUC=%0.3f)' % (auc_blgb), lw=2)
+
+plt.plot(fpr_rf, tpr_rf, label='RF (AUC=%0.3f)' % (auc_rf), lw=2)
+plt.plot(fpr_brf, tpr_brf, label='Weighted RF(AUC=%0.3f)' % (auc_brf), lw=2)
+
 plt.xlabel('False positive rate')
 plt.ylabel('True positive rate')
 plt.title('ROC curve')
@@ -233,18 +249,6 @@ def save_results(GeoID, y_pred, y_predprob, result_file):
     np.savetxt(result_file, results, header = header_string, fmt = '%d,%d,%0.5f',delimiter = ',')
     print('Saving file Done!')
 
-file = open("./data/model_GBDT.pickle", "wb")
-pickle.dump(lgb, file)
-file.close()
-
-file = open("./data/model_LR.pickle", "wb")
-pickle.dump(lr, file)
-file.close()
-
-file = open("./data/model_weightedGBDT.pickle", "wb")
-pickle.dump(blgb, file)
-file.close()
-
 y_pred_gdbt = pipeline_lgb.predict(X)
 y_pred_proba_gdbt = pipeline_lgb.predict_proba(X)[:,1]
 result_file_gdbt = './data/gbdt.txt'
@@ -259,5 +263,20 @@ y_pred_lr = pipeline_lr.predict(X)
 y_pred_proba_lr = pipeline_lr.predict_proba(X)[:,1]
 result_file_lr = './data/lr.txt'
 save_results(GeoID, y_pred_lr, y_pred_proba_lr, result_file_lr)
+
+y_pred_blr = pipeline_blr.predict(X)
+y_pred_proba_blr = pipeline_blr.predict_proba(X)[:,1]
+result_file_blr = './data/blr.txt'
+save_results(GeoID, y_pred_blr, y_pred_proba_blr, result_file_blr)
+
+y_pred_rf = pipeline_rf.predict(X)
+y_pred_proba_rf = pipeline_rf.predict_proba(X)[:,1]
+result_file_rf = './data/rf.txt'
+save_results(GeoID, y_pred_rf, y_pred_proba_rf, result_file_rf)
+
+y_pred_brf = pipeline_brf.predict(X)
+y_pred_proba_brf = pipeline_brf.predict_proba(X)[:,1]
+result_file_brf = './data/brf.txt'
+save_results(GeoID, y_pred_brf, y_pred_proba_brf, result_file_brf)
 
 print('Done')
