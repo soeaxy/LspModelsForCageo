@@ -15,7 +15,7 @@ from sklearn.linear_model import LogisticRegressionCV
 
 from sklearn.metrics import (balanced_accuracy_score, classification_report,
                              confusion_matrix, recall_score, roc_auc_score,
-                             roc_curve, auc)
+                             roc_curve, auc,accuracy_score)
 from sklearn.model_selection import train_test_split
 
 
@@ -64,7 +64,7 @@ def data_raw(data):
 
 data = pd.read_csv('./data/wanzhou_island.csv')
 X, y, GeoID = data_raw(data)
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3,stratify=y, random_state=0)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.4,stratify=y, random_state=0)
 
 # Instanciate a PCA object
 pca = PCA(n_components='mle')
@@ -90,21 +90,21 @@ y_pred_lr = pipeline_lr.predict(X_test)
 y_pred_blr = pipeline_blr.predict(X_test)
 
 print('Logistic Regression classifier performance:')
-print('Balanced accuracy: {:.3f} - Geometric mean {:.3f}'
+print('Balanced accuracy: {:.3f} - Geometric mean {:.3f} - Recall {:.3f} - Accuracy {:.3f}'
       .format(balanced_accuracy_score(y_test, y_pred_lr),
-              geometric_mean_score(y_test, y_pred_lr)))
+              geometric_mean_score(y_test, y_pred_lr),recall_score(y_test, y_pred_lr),accuracy_score(y_test, y_pred_lr)))
 cm_rf = confusion_matrix(y_test, y_pred_lr)
 fig, ax = plt.subplots(ncols=2)
 plot_confusion_matrix(cm_rf, classes=[0,1], ax=ax[0],
                       title='Logistic Regression')
 
 print('Balanced Logistic Regression classifier performance:')
-print('Balanced accuracy: {:.3f} - Geometric mean {:.3f}'
+print('Balanced accuracy: {:.3f} - Geometric mean {:.3f}- Recall {:.3f} - Accuracy {:.3f}'
       .format(balanced_accuracy_score(y_test, y_pred_blr),
-              geometric_mean_score(y_test, y_pred_blr)))
+              geometric_mean_score(y_test, y_pred_blr),recall_score(y_test, y_pred_blr),accuracy_score(y_test, y_pred_blr)))
 cm_brf = confusion_matrix(y_test, y_pred_blr)
 plot_confusion_matrix(cm_brf, classes=[0,1], ax=ax[1],
-                      title='Balanced Logistic Regression')
+                      title='Weighted Logistic Regression')
 plt.show()
 
 ###############################################################################
@@ -132,21 +132,21 @@ y_pred_brf = pipeline_brf.predict(X_test)
 # forest outsperforms the bagging classifier.
 
 print('Random Forest classifier performance:')
-print('Balanced accuracy: {:.3f} - Geometric mean {:.3f}'
+print('Balanced accuracy: {:.3f} - Geometric mean {:.3f} - Recall {:.3f} - Accuracy {:.3f}'
       .format(balanced_accuracy_score(y_test, y_pred_rf),
-              geometric_mean_score(y_test, y_pred_rf)))
+              geometric_mean_score(y_test, y_pred_rf), recall_score(y_test, y_pred_rf),accuracy_score(y_test, y_pred_rf)))
 cm_rf = confusion_matrix(y_test, y_pred_rf)
 fig, ax = plt.subplots(ncols=2)
 plot_confusion_matrix(cm_rf, classes=[0,1], ax=ax[0],
-                      title='Random forest')
+                      title='Random Forest')
 
 print('Balanced Random Forest classifier performance:')
-print('Balanced accuracy: {:.3f} - Geometric mean {:.3f}'
+print('Balanced accuracy: {:.3f} - Geometric mean {:.3f}- Recall {:.3f} - Accuracy {:.3f}'
       .format(balanced_accuracy_score(y_test, y_pred_brf),
-              geometric_mean_score(y_test, y_pred_brf)))
+              geometric_mean_score(y_test, y_pred_brf),recall_score(y_test, y_pred_brf),accuracy_score(y_test, y_pred_brf)))
 cm_brf = confusion_matrix(y_test, y_pred_brf)
 plot_confusion_matrix(cm_brf, classes=[0,1], ax=ax[1],
-                      title='Balanced random forest')
+                      title='Weighted Random Forest')
 
 plt.show()
 ###############################################################################
@@ -166,24 +166,24 @@ pipeline_blgb.fit(X_train, y_train)
 y_pred_lgb = pipeline_lgb.predict(X_test)
 y_pred_blgb = pipeline_blgb.predict(X_test)
 
-print('GBDT classifier performance:')
-print('Balanced accuracy: {:.3f} - Geometric mean {:.3f} - Recall {:.3f} - AUC {:.3f}'
+print('LightGBM classifier performance:')
+print('Balanced accuracy: {:.3f} - Geometric mean {:.3f} - Recall {:.3f} - Accuracy {:.3f}'
       .format(balanced_accuracy_score(y_test, y_pred_lgb),
-              geometric_mean_score(y_test, y_pred_lgb), recall_score(y_test, y_pred_lgb), roc_auc_score(y_test,y_pred_lgb)))
+              geometric_mean_score(y_test, y_pred_lgb), recall_score(y_test, y_pred_lgb), accuracy_score(y_test,y_pred_lgb)))
 
 cm_lgb = confusion_matrix(y_test, y_pred_lgb)
 fig, ax = plt.subplots(ncols=2)
 plot_confusion_matrix(cm_lgb, classes=[0,1], ax=ax[0],
-                      title='GBDT')
+                      title='LightGBM')
 
-print('Weighted GBDT classifier performance:')
-print('Balanced accuracy: {:.3f} - Geometric mean {:.3f} - Recall {:.3f} - AUC {:.3f}'
+print('Weighted LightGBM classifier performance:')
+print('Balanced accuracy: {:.3f} - Geometric mean {:.3f} - Recall {:.3f} - Accuracy {:.3f}'
       .format(balanced_accuracy_score(y_test, y_pred_blgb),
-              geometric_mean_score(y_test, y_pred_blgb), recall_score(y_test, y_pred_blgb), roc_auc_score(y_test,y_pred_blgb)))
+              geometric_mean_score(y_test, y_pred_blgb), recall_score(y_test, y_pred_blgb), accuracy_score(y_test,y_pred_blgb)))
 
 cm_blgb = confusion_matrix(y_test, y_pred_blgb)
 plot_confusion_matrix(cm_blgb, classes=[0,1], ax=ax[1],
-                      title='Weighted GBDT')
+                      title='Weighted LightGBM')
 plt.show()
 ###############################################################################
 # Plot ROC Curve
@@ -224,11 +224,11 @@ plt.plot([0, 1], [0, 1], 'k--')
 plt.plot(fpr_lr, tpr_lr, label='LR (AUC=%0.3f)' % (auc_lr), lw=2)
 plt.plot(fpr_blr, tpr_blr, label='Weighted LR (AUC=%0.3f)' % (auc_blr), lw=2)
 
-plt.plot(fpr_lgb, tpr_lgb, label='GBDT (AUC=%0.3f)' % (auc_lgb), lw=2)
-plt.plot(fpr_blgb, tpr_blgb, label='Weighted GBDT(AUC=%0.3f)' % (auc_blgb), lw=2)
+plt.plot(fpr_lgb, tpr_lgb, label='LightGBM (AUC=%0.3f)' % (auc_lgb), lw=2)
+plt.plot(fpr_blgb, tpr_blgb, label='Weighted LightGBM(AUC=%0.3f)' % (auc_blgb), lw=2)
 
 plt.plot(fpr_rf, tpr_rf, label='RF (AUC=%0.3f)' % (auc_rf), lw=2)
-plt.plot(fpr_brf, tpr_brf, label='Weighted RF(AUC=%0.3f)' % (auc_brf), lw=2)
+plt.plot(fpr_brf, tpr_brf, label='WRF(AUC=%0.3f)' % (auc_brf), lw=2)
 
 plt.xlabel('False positive rate')
 plt.ylabel('True positive rate')
