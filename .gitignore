@@ -1,7 +1,8 @@
 *.pdf
 *.svg
 *.pickle
-*.txt
 *.pyc
 *wanzhou_island.csv
 .vscode
+*.txt
+!requirements.txt
