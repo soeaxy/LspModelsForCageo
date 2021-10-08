@@ -60,7 +60,7 @@ x_columns = ['Elevation', 'Slope', 'Aspect', 'TRI', 'Curvature', 'Lithology', 'R
 GeoID = train['ID']
 
 X, y = train[x_columns], train_labels
-X_train, X_test, y_train, y_test = train_test_split(X, y, stratify=y, random_state=0)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.4, stratify=y, random_state=0)
 
 # Instanciate a PCA object
 pca = PCA(n_components='mle')
@@ -203,6 +203,72 @@ y_pred_wlgb_p = pipeline_wlgb.predict_proba(X_test)[:, 1]
 fpr_wlgb, tpr_wlgb, _ = roc_curve(y_test, y_pred_wlgb_p)
 auc_wlgb = roc_auc_score(y_test,y_pred_wlgb_p)
 
+def PlotCostCurve(y_test, y_pred_p, **kw):
+
+# C(-|+)
+    cost_fn = kw['cost_fn']
+# C(+|-)
+    cost_fp = kw['cost_fp']
+
+# Ground truth
+    truth = y_test
+# Predictions from a classifier
+    score = y_pred_p
+
+# % OUTPUTS
+
+# 1D-array of x-axis values (normalized PC)
+    pc = None
+# list of lines as (slope, intercept)
+    lines = []
+# lower envelope of the list of lines as a 1D-array of y-axis values (NEC)
+    lower_envelope = []
+# area under the lower envelope (the smaller, the better)
+    area = None
+
+# % COMPUTATION
+
+# points from the roc curve, because a point in the ROC space <=> a line in the cost space
+    roc_fpr, roc_tpr, _ = roc_curve(truth, score)
+
+# compute the normalized p(+)*C(-|+)
+    thresholds = np.arange(0, 1.01, .01)
+    pc = (thresholds*cost_fn) / (thresholds*cost_fn + (1-thresholds)*cost_fp)
+
+# compute a line in the cost space for each point in the roc space
+    for fpr, tpr in zip(roc_fpr, roc_tpr):
+        slope = (1-tpr-fpr)
+        intercept = fpr
+        lines.append((slope, intercept))
+
+# compute the lower envelope
+    for x_value in pc:
+        y_value = min([slope*x_value+intercept for slope, intercept in lines])
+        lower_envelope.append(max(0, y_value))
+    lower_envelope = np.array(lower_envelope)
+
+# compute the area under the lower envelope using the composite trapezoidal rule
+    area = np.trapz(lower_envelope, pc)
+
+# % EXAMPLE OF PLOT
+
+# display each line as a thin dashed line
+    for slope, intercept in lines:
+        plt.plot(pc, slope*pc+intercept, lw=1, linestyle="--")
+
+# display the lower envelope as a thicker black line
+    plt.plot(pc, lower_envelope, color="black", lw=3, label="area={:.3f}".format(area))
+
+# plot parameters
+    plt.xlim([0.0, 1.0])
+    plt.ylim([0.0, 1.05*max(lower_envelope)])
+    plt.xlabel("Probability Cost Function")
+    plt.ylabel("Normalized Expected Cost")
+    plt.title("Cost curve")
+    plt.legend(loc="lower right")
+
+    plt.show()
+
 # The rf model 
 y_pred_rf_p = pipeline_rf.predict_proba(X_test)[:, 1]
 fpr_rf, tpr_rf, _ = roc_curve(y_test, y_pred_rf_p)
@@ -230,6 +296,13 @@ plt.title('ROC curve')
 plt.legend(loc='best')
 
 plt.show()
+
+PlotCostCurve(y_test, y_pred_lgb_p, cost_fn=1,cost_fp=1)
+PlotCostCurve(y_test, y_pred_wlgb_p, cost_fn=1,cost_fp=19)
+PlotCostCurve(y_test, y_pred_lr_p, cost_fn=1,cost_fp=1)
+PlotCostCurve(y_test, y_pred_wlr_p, cost_fn=1,cost_fp=19)
+PlotCostCurve(y_test, y_pred_rf_p, cost_fn=1,cost_fp=1)
+PlotCostCurve(y_test, y_pred_wrf_p, cost_fn=1,cost_fp=19)
 
 ###############################################################################
 # Save Models and Results

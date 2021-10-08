@@ -1,7 +1,7 @@
 '''
 Author: yxsong
 Date: 2021-09-10 09:28:16
-LastEditTime: 2021-09-16 11:09:26
+LastEditTime: 2021-09-17 20:29:24
 LastEditors: yxsong
 Description: 
 FilePath: \LSM_Model_Imbalanced\WeightCalculate.py
@@ -43,7 +43,7 @@ def DataPrepare(data):
 
 # Change weight for the sample and save the weight
 def WriteWeihtFile(X,y, classifier, weight_file):
-    X_train, X_test, y_train, y_test = train_test_split(X,y,test_size=0.4)
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.4, stratify=y)
     # Instanciate a PCA object
     pca = PCA(n_components='mle')
     stdscaler = preprocessing.StandardScaler()
@@ -66,7 +66,7 @@ def WriteWeihtFile(X,y, classifier, weight_file):
     f.close
 
 
-def PlotWeightAndRecall(inputFile):
+def PlotWeightOfGmean(inputFile):
     data = pd.read_csv(inputFile)
     name_list = ['Balanced accuracy','geometric_mean_score','Recall','AUC']
     weight = data['weight']
@@ -78,7 +78,7 @@ def PlotWeightAndRecall(inputFile):
     max_Geo=np.argmax(Geo_score)
     max_Recall=np.argmax(Recall)
 
-    plt.plot(weight,Geo_score,'r-*',label='Geometric Mean Score')
+    plt.plot(weight,Geo_score,'b-*',label='Geometric Mean Score')
     # plt.plot(weight,Recall,'g-o',label=name_list[2])
     # plt.plot(weight,AUC,'b-*',label=name_list[3])
 
@@ -92,18 +92,19 @@ def PlotWeightAndRecall(inputFile):
         xycoords='data',
         xytext = (24,0.65),
         textcoords = 'data', ha = 'center', va = 'center',
-        bbox = dict(boxstyle = 'round, pad=0.5', fc = 'yellow', alpha = 0.5),
+        bbox = dict(boxstyle = 'round, pad=0.5', fc = 'orange', alpha = 0.5),
         arrowprops = dict(arrowstyle = '->', connectionstyle = 'arc3, rad=0'))
 
     plt.axvline(x=max_Geo+1, color='b', linestyle=':', linewidth=1, label='Best weight chosen')
-    plt.xlabel('Weight of the landslide samples data')
-    plt.ylabel('Score')
+    plt.xlabel('Misclassification weight of non-landslide samples')
+    plt.ylabel('Geometric Mean Score')
     plt.legend()
     plt.show()
 
 if __name__ == "__main__":
     # data = pd.read_csv('./data/wanzhou_island.csv')
     # X, y, GeoID = DataPrepare(data)
+    
     weight_file = r'data\weight_file.csv'
     # WriteWeihtFile(X, y, LGBMClassifier, weight_file)
-    PlotWeightAndRecall(weight_file)
+    PlotWeightOfGmean(weight_file)
